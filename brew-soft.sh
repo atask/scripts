@@ -21,6 +21,7 @@ brew cask install iterm2
 brew cask install google-chrome
 brew cask install opera
 brew cask install sourcetree
+brew cask install steam
 
 git config --global user.name "Allan Taschini"
 git config --global user.email "allan.taschini@gmail.com"
