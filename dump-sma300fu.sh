@@ -30,24 +30,27 @@ adb pull /sdcard/CallLogBackupRestore
 #rm whatsapp_$foldername.ab
 
 # backup whatsapp databases
+# adb shell calls with su need to use different location because of multi-user
+# functionalities in Jelly Bean
+# http://android.stackexchange.com/questions/39542/confused-by-the-many-locations-of-the-virtual-sdcard
 mkdir -p $backupdest/whatsapp_$foldername/
-adb shell "su -c mkdir /sdcard/temp_whatsapp"
-adb shell "su -c cp /data/data/com.whatsapp/databases/msgstore.db /sdcard/temp_whatsapp/msgstore.db"
-adb shell "su -c cp /data/data/com.whatsapp/databases/wa.db /sdcard/temp_whatsapp/wa.db"
+adb shell "su -c mkdir /storage/emulated/0/temp_whatsapp"
+adb shell "su -c cp /data/data/com.whatsapp/databases/msgstore.db /storage/emulated/0/temp_whatsapp/msgstore.db"
+adb shell "su -c cp /data/data/com.whatsapp/databases/wa.db /storage/emulated/0/temp_whatsapp/wa.db"
 cd $backupdest/whatsapp_$foldername
-adb pull /sdcard/temp_whatsapp
+adb pull /storage/emulated/legacy/temp_whatsapp
 mv msgstore.db msgstore_$foldername.db
 mv wa.db wa_$foldername.db
-adb shell "su -c rm -r /sdcard/temp_whatsapp"
+adb shell "su -c rm -r /storage/emulated/0/temp_whatsapp"
 
 # backup shazam databases
 mkdir -p $backupdest/shazam_$foldername/
-adb shell "su -c mkdir /sdcard/temp_shazam"
-adb shell "su -c cp /data/data/com.shazam.android/databases/library.db /sdcard/temp_shazam/library.db"
+adb shell "su -c mkdir /storage/emulated/0/temp_shazam"
+adb shell "su -c cp /data/data/com.shazam.android/databases/library.db /storage/emulated/0/temp_shazam/library.db"
 cd $backupdest/shazam_$foldername
-adb pull /sdcard/temp_shazam
+adb pull /storage/emulated/legacy/temp_shazam
 mv library.db shazam-library_$foldername.db
-adb shell "su -c rm -r /sdcard/temp_shazam"
+adb shell "su -c rm -r /storage/emulated/0/temp_shazam"
 
 # backup whatsapp media (audio)
 mkdir -p $backupdest/whatsapp-audio_$foldername
