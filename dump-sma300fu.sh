@@ -9,9 +9,10 @@ cd $backupdest/SMSBackupRestore_$foldername
 adb pull /sdcard/SMSBackupRestore
 
 # copy CallLogBackupRestore incremental calls.xml and calls.xsl
-mkdir -p $backupdest/CallLogBackupRestore_$foldername
-cd $backupdest/CallLogBackupRestore_$foldername
-adb pull /sdcard/CallLogBackupRestore
+# -- discontinued =[ --
+#mkdir -p $backupdest/CallLogBackupRestore_$foldername
+#cd $backupdest/CallLogBackupRestore_$foldername
+#adb pull /sdcard/CallLogBackupRestore
 
 ## OLD VERSION: NOT WORKING WITH ROOT ?!?
 # backup shazam and decompress ab into tar
