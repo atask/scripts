@@ -1,0 +1,26 @@
+{
+  "name": "one-shots",
+  "version": "0.1.0",
+  "description": "Some random scripts",
+  "main": "index.js",
+  "scripts": {
+    "standard": "standard *.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://atask@github.com/atask/scripts.git"
+  },
+  "author": "ᴉuᴉɥɔsɐʇ uɐllɐ <allan.taschini@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/atask/scripts/issues"
+  },
+  "homepage": "https://github.com/atask/scripts#readme",
+  "devDependencies": {
+    "standard": "^7.1.2"
+  },
+  "dependencies": {
+    "fs-extra": "^0.30.0",
+    "glob": "^7.0.3"
+  }
+}
