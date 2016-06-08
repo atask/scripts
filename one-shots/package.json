@@ -12,9 +12,6 @@
   },
   "author": "ᴉuᴉɥɔsɐʇ uɐllɐ <allan.taschini@gmail.com>",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/atask/scripts/issues"
-  },
   "homepage": "https://github.com/atask/scripts#readme",
   "devDependencies": {
     "standard": "^7.1.2"
