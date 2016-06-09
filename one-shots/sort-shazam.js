@@ -28,7 +28,7 @@ async.eachSeries(dbs, (db, callback) => {
       })
     },
     // get tags
-    getTags: callback => {
+    getTags: (openDb, callback) => {
       shazamDb.all(tagQuery, (err, rows) => {
         if (err) return callback(err)
         if (rows.length === 0) return callback(null, rows, true)
@@ -37,7 +37,7 @@ async.eachSeries(dbs, (db, callback) => {
       })
     },
     // test if tracks table is available
-    hasTracksTable: callback => {
+    hasTracksTable: (openDb, callback) => {
       shazamDb.get(testTrackQuery, (err, row) => {
         if (err) return callback(err)
         if (row) return callback(null, true)
@@ -46,21 +46,53 @@ async.eachSeries(dbs, (db, callback) => {
     },
     // get tracks
     getTracks: (hasTracksTable, callback) => {
-      if (!hasTracksTable) return callback([])
+      if (!hasTracksTable) return callback(null, null)
       shazamDb.all(trackQuery, (err, rows) => {
         if (err) return callback(err)
         console.log('\t\tFound songs:')
-        rows.forEach(row => console.log(`\t\t${row.title} - ${row.artist_name}`))
-        callback(rows)
+        callback(null, rows)
       })
     },
     processTags: (getTags, getTracks, callback) => {
-
+      if (getTracks !== null) {
+        // old version of shazam db
+        getTracks.forEach(track => {
+          let trackInfo = {
+            title: track.title,
+            artist: track.artist_name,
+            cover: track.art_id,
+            link: `http://www.shazam.com/track/${track.key}`
+          }
+          let id = `${trackInfo.title}-${trackInfo.artist}`
+          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist}`)
+          if (id in songs) { return }
+          songs[id] = trackInfo
+        })
+      } else {
+        // new version of shazam db
+        let [tags] = getTags
+        tags.forEach(tag => {
+          if (tag.json) {
+            let track = JSON.parse(tag.json).track
+            let trackInfo = {
+              title: track.heading.title,
+              artist: track.heading.subtitle,
+              cover: track.images.default,
+              link: track.url
+            }
+            let id = `${trackInfo.title}-${trackInfo.artist}`
+            console.log(`\t\t${trackInfo.title} - ${trackInfo.artist}`)
+            if (id in songs) { return }
+            songs[id] = trackInfo
+          }
+        })
+      }
+      callback()
     },
-    closeDb: (processTags) => {
+    closeDb: (processTags, callback) => {
       shazamDb.close((err) => {
         if (err) callback(err)
-        callback(null)
+        callback()
       })
     }
   },
