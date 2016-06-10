@@ -14,7 +14,7 @@ console.log('Collecting tracks:')
 let shazamDb
 let trackQuery = 'SELECT * FROM track'
 let testTrackQuery = "SELECT name FROM sqlite_master WHERE type='table' AND name='track'"
-let tagQuery = 'SELECT json FROM tag'
+let tagQuery = 'SELECT * FROM tag'
 async.eachSeries(dbs, (db, callback) => {
   console.log(`\tparsing ${db}`)
   let dbPath = path.join(cwd, db)
@@ -58,13 +58,14 @@ async.eachSeries(dbs, (db, callback) => {
         // old version of shazam db
         getTracks.forEach(track => {
           let trackInfo = {
+            id: track['_id'],
             title: track.title,
             artist: track.artist_name,
             cover: track.art_id,
-            link: `http://www.shazam.com/track/${track.key}`
+            link: `http://www.shazam.com/track/${track.id}`
           }
-          let id = `${trackInfo.title}-${trackInfo.artist}`
-          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist}`)
+          let id = trackInfo.id
+          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist} (${trackInfo.id})`)
           if (id in songs) { return }
           songs[id] = trackInfo
         })
@@ -72,19 +73,30 @@ async.eachSeries(dbs, (db, callback) => {
         // new version of shazam db
         let [tags] = getTags
         tags.forEach(tag => {
+          let trackInfo
           if (tag.json) {
             let track = JSON.parse(tag.json).track
-            let trackInfo = {
-              title: track.heading.title,
-              artist: track.heading.subtitle,
-              cover: track.images.default,
-              link: track.url
+            // some jsons won't have any embedded info (!?!)
+            trackInfo = {
+              id: tag.track_key,
+              title: track.heading ? track.heading.title : 'unknown title',
+              artist: track.heading ? track.heading.subtitle : 'unknown artist',
+              cover: track.images ? track.images.default : '',
+              link: track.url ? track.url : `http://www.shazam.com/track/${tag.track_key}`
             }
-            let id = `${trackInfo.title}-${trackInfo.artist}`
-            console.log(`\t\t${trackInfo.title} - ${trackInfo.artist}`)
-            if (id in songs) { return }
-            songs[id] = trackInfo
+          } else {
+            trackInfo = {
+              id: tag.track_key,
+              title: 'unknown title',
+              artist: 'unknown artist',
+              cover: '',
+              link: `http://www.shazam.com/track/${tag.track_key}`
+            }
           }
+          let id = trackInfo.id
+          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist} (${trackInfo.id})`)
+          if (id in songs) { return }
+          songs[id] = trackInfo
         })
       }
       callback()
