@@ -2,8 +2,10 @@ const path = require('path')
 const glob = require('glob')
 const async = require('async')
 const sqlite3 = require('sqlite3')
+const record = require('./record')
 
-let songs = {}
+const OUT_FILE = './out/shazam.json'
+let songMap = record.loadSync(OUT_FILE)
 
 // get dir index
 let cwd = '/home/allan/Downloads/shazam'
@@ -58,16 +60,16 @@ async.eachSeries(dbs, (db, callback) => {
         // old version of shazam db
         getTracks.forEach(track => {
           let trackInfo = {
-            id: track['_id'],
+            key: track['_id'],
             title: track.title,
             artist: track.artist_name,
             cover: track.art_id,
-            link: `http://www.shazam.com/track/${track.id}`
+            link: `http://www.shazam.com/track/${track['_id']}`
           }
-          let id = trackInfo.id
-          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist} (${trackInfo.id})`)
-          if (id in songs) { return }
-          songs[id] = trackInfo
+          let key = trackInfo.key
+          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist} (${trackInfo.key})`)
+          if (key in songMap) { return }
+          songMap[key] = trackInfo
         })
       } else {
         // new version of shazam db
@@ -78,7 +80,7 @@ async.eachSeries(dbs, (db, callback) => {
             let track = JSON.parse(tag.json).track
             // some jsons won't have any embedded info (!?!)
             trackInfo = {
-              id: tag.track_key,
+              key: tag.track_key,
               title: track.heading ? track.heading.title : 'unknown title',
               artist: track.heading ? track.heading.subtitle : 'unknown artist',
               cover: track.images ? track.images.default : '',
@@ -86,17 +88,17 @@ async.eachSeries(dbs, (db, callback) => {
             }
           } else {
             trackInfo = {
-              id: tag.track_key,
+              key: tag.track_key,
               title: 'unknown title',
               artist: 'unknown artist',
               cover: '',
               link: `http://www.shazam.com/track/${tag.track_key}`
             }
           }
-          let id = trackInfo.id
-          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist} (${trackInfo.id})`)
-          if (id in songs) { return }
-          songs[id] = trackInfo
+          let key = trackInfo.key
+          console.log(`\t\t${trackInfo.title} - ${trackInfo.artist} (${trackInfo.key})`)
+          if (key in songMap) { return }
+          songMap[key] = trackInfo
         })
       }
       callback()
@@ -114,5 +116,8 @@ async.eachSeries(dbs, (db, callback) => {
   })
 }, err => {
   if (err) console.log(err)
-  else console.log('DONE!')
+  else {
+    record.dumpSync(OUT_FILE, songMap, 'key')
+    console.log(`DONE! Saved ${Object.keys(songMap).length} entries`)
+  }
 })

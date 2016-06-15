@@ -3,8 +3,10 @@ const path = require('path')
 const glob = require('glob')
 const async = require('async')
 const xml2js = require('xml2js')
+const record = require('./record')
 
-let smsMap = {}
+const OUT_FILE = './out/smses.json'
+let smsMap = record.loadSync(OUT_FILE)
 
 // get dir index
 let cwd = '/home/allan/Downloads/SMSBackupRestore'
@@ -33,5 +35,8 @@ async.eachSeries(xmls, (xml, callback) => {
   })
 }, err => {
   if (err) console.log(err)
-  else console.log('DONE! ' + Object.keys(smsMap).length)
+  else {
+    record.dumpSync(OUT_FILE, smsMap, 'date')
+    console.log(`DONE! Saved ${Object.keys(smsMap).length} entries`)
+  }
 })
