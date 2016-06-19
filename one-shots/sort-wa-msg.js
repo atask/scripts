@@ -76,13 +76,13 @@ async.autoInject({
       let chat = createContactsMap[message.jid] || null
       let contact = createContactsMap[message.from] || null
       if (!contact) {
-        callback(`Message [${message.receivedTimestamp}] has no valid contact!`)
+        return callback(`Message [${message.receivedTimestamp}] has no valid contact!`)
       }
       let key = `${message.receivedTimestamp}:${message.from}`
       message.from = contact.displayName || contact.waName
       message.chat = chat ? chat.displayName : null
       if (key in waMap) {
-        callback(`Message [${key}] is a dupe !?!`)
+        return callback(`Message [${key}] is a dupe !?!`)
       }
       waMap[key] = message
     })
@@ -106,7 +106,7 @@ async.autoInject({
 err => {
   if (err) console.log(`ERR: ${err}`)
   else {
-    // record.dumpSync(OUT_FILE, waMap, 'key')
+    record.dumpSync(OUT_FILE, waMap)
     console.log(`DONE! Saved ${Object.keys(waMap).length} entries`)
   }
 })
