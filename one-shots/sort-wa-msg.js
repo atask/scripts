@@ -18,6 +18,8 @@ console.log(`startLimit: ${startLimit}`)
 let endLimit = moment(TARGET_DAY, 'DD-MM-YYYY').endOf('day').valueOf()
 console.log(`endLimit: ${endLimit}`)
 
+let targetDayISO = moment(TARGET_DAY, 'DD-MM-YYYY').format('Y-MM-DD')
+
 console.log('Collecting messages:')
 
 let msgstore
@@ -44,11 +46,7 @@ async.autoInject({
   getContacts: (openWaDb, callback) => {
     wastore.all(contactsQuery, (err, rows) => {
       if (err) return callback(err)
-      console.log(`Found ${rows.length} contacts:`)
       let contacts = rows.map(waContact.parse)
-      contacts.forEach(contact => {
-        console.log(`\t[${contact.jid}] ${contact.displayName}`)
-      })
       callback(null, contacts)
     })
   },
@@ -56,11 +54,7 @@ async.autoInject({
   getMessages: (openMsgDb, callback) => {
     msgstore.all(msqQuery, (err, rows) => {
       if (err) return callback(err)
-      console.log(`Found ${rows.length} messages on ${TARGET_DAY}:`)
       let messages = rows.map(waMessage.parse)
-      messages.forEach(message => {
-        console.log(`\t[${message.receivedTimestamp}] ${message.text}`)
-      })
       callback(null, messages)
     })
   },
@@ -70,22 +64,54 @@ async.autoInject({
     getContacts.forEach(contact => { contactsMap[contact.jid] = contact })
     callback(null, contactsMap)
   },
-  // merge chats/contacts info with messages
-  mergeIntoMessage: (getMessages, createContactsMap, callback) => {
-    getMessages.forEach(message => {
-      let chat = createContactsMap[message.jid] || null
-      let contact = createContactsMap[message.from] || null
-      if (!contact) {
+  // create snapshot (contacts and messages in a specific day)
+  createSnapshot: (getMessages, createContactsMap, callback) => {
+    let messages = getMessages
+    let contactMap = createContactsMap
+    let selectedContacts = {}
+    // select only used contacts
+    messages.forEach(message => {
+      // actual contact that sent the message
+      let fromContact = message.fromJid
+        ? contactMap[message.fromJid]
+        : null
+      // group contact the message is stored into
+      let groupContact = message.groupJid
+        ? contactMap[message.groupJid]
+        : null
+      if (fromContact === null && groupContact === null) {
         return callback(`Message [${message.receivedTimestamp}] has no valid contact!`)
       }
-      let key = `${message.receivedTimestamp}:${message.from}`
-      message.from = contact.displayName || contact.waName
-      message.chat = chat ? chat.displayName : null
-      if (key in waMap) {
-        return callback(`Message [${key}] is a dupe !?!`)
+      // add contact info if needed
+      if (fromContact && !(fromContact.jid in selectedContacts)) {
+        selectedContacts[fromContact.jid] = fromContact
       }
-      waMap[key] = message
+      if (groupContact && !(groupContact.jid in selectedContacts)) {
+        selectedContacts[groupContact.jid] = groupContact
+      }
     })
+    // flatten selectedContacts map
+    let selectedContactsArray = []
+    Object.keys(selectedContacts).forEach(contact => {
+      selectedContactsArray.push(selectedContacts[contact])
+    })
+    // debug
+    console.log(`Parsed ${messages.length} messages on ${TARGET_DAY}:`)
+    messages.forEach(message => {
+      let previewText = message.type === waMessage.TEXT
+        ? message.text.substring(0, 20)
+        : ''
+      console.log(`\t[${message.receivedTimestamp} - ${message.type}] ${previewText}`)
+    })
+    console.log(`Parsed ${selectedContactsArray.length} contacts:`)
+    selectedContactsArray.forEach(contact => {
+      console.log(`\t[${contact.jid}] ${contact.displayName}`)
+    })
+    waMap[targetDayISO] = {
+      messages: getMessages,
+      contacts: selectedContactsArray,
+      reference: MSG_DB
+    }
     callback(null)
   },
   // close message store db connection
