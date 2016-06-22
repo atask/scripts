@@ -23,7 +23,6 @@
     "lodash": "^4.13.1",
     "moment": "^2.13.0",
     "sqlite3": "^3.1.4",
-    "squeeze": "github:atask/squeeze",
     "xml2js": "^0.4.16"
   }
 }
