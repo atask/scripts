@@ -4,9 +4,9 @@ backupdest=~/Downloads/dumps-sma300fu
 foldername=$(date +%Y%m%d)
 
 # copy SMSBackupRestore incremental sms.xml and sms.xsl
-#mkdir -p $backupdest/SMSBackupRestore_$foldername
-#cd $backupdest/SMSBackupRestore_$foldername
-#adb pull /sdcard/SMSBackupRestore
+mkdir -p $backupdest/SMSBackupRestore_$foldername
+cd $backupdest/SMSBackupRestore_$foldername
+adb pull /sdcard/SMSBackupRestore
 
 # backup whatsapp databases and avatars
 # adb shell calls with su need to use different location because of multi-user
