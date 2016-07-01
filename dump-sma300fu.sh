@@ -57,3 +57,8 @@ adb pull /sdcard/Pictures/Screenshots
 mkdir -p $backupdest/9gag_$foldername/
 cd $backupdest/9gag_$foldername/
 adb pull /sdcard/Pictures/9GAG
+
+# backup downloads from internal sd card
+mkdir -p $backupdest/downloads_$foldername/
+cd $backupdest/downloads_$foldername/
+adb pull /sdcard/Download
