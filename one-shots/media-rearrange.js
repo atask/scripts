@@ -34,7 +34,7 @@ prompt.get({
 })
 
 function moveFiles () {
-  let files = glob.sync('**/*.jpg')
+  let files = glob.sync('**/*.+(jpg|mp4)')
   console.log(`Found ${files.length} files`)
 
   async.series(files.map(src => {
