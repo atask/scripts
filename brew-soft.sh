@@ -9,6 +9,9 @@ brew install python
 brew install android-platform-tools
 brew install node
 brew install jhead
+# brew install exiftool
+# brew install ufraw --with-exiv2
+brew install imagemagick
 
 brew cask install keka
 brew cask install vlc
