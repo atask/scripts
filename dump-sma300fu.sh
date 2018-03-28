@@ -1,13 +1,10 @@
 #!/bin/bash
 
-backupdest=~/Downloads/dumps-sma300fu
 foldername=$(date +%Y%m%d)
-
-# enter backup folder
-cd $backupdest
+backupdest=~/Downloads/dumps-sma300fu/dump-sma300fu-$foldername
 
 # copy SMSBackupRestore incremental sms.xml and sms.xsl
-adb pull -a /sdcard/SMSBackupRestore $backupdest/SMSBackupRestore_$foldername
+adb pull -a /sdcard/SMSBackupRestore $backupdest/SMSBackupRestore
 
 # backup whatsapp databases and avatars
 # adb shell calls with su need to use different location because of multi-user
@@ -18,32 +15,29 @@ adb shell "su -c cp /data/data/com.whatsapp/databases/msgstore.db /storage/emula
 adb shell "su -c cp /data/data/com.whatsapp/databases/wa.db /storage/emulated/0/temp_whatsapp/wa.db"
 adb shell "su -c cp -R /data/data/com.whatsapp/files/Avatars /storage/emulated/0/temp_whatsapp"
 adb shell "su -c \"cp -R /data/data/com.whatsapp/cache/Profile\ Pictures /storage/emulated/0/temp_whatsapp\""
-adb pull -a /storage/emulated/legacy/temp_whatsapp $backupdest/whatsapp_$foldername
+adb pull -a /storage/emulated/legacy/temp_whatsapp $backupdest/whatsapp
 adb shell "su -c rm -r /storage/emulated/0/temp_whatsapp"
-mv $backupdest/whatsapp_$foldername/msgstore.db $backupdest/whatsapp_$foldername/msgstore_$foldername.db
-mv $backupdest/whatsapp_$foldername/wa.db $backupdest/whatsapp_$foldername/wa_$foldername.db
 
 # backup shazam databases
 adb shell "su -c mkdir /storage/emulated/0/temp_shazam"
 adb shell "su -c cp /data/data/com.shazam.android/databases/library.db /storage/emulated/0/temp_shazam/library.db"
-adb pull -a /storage/emulated/legacy/temp_shazam $backupdest/shazam_$foldername
+adb pull -a /storage/emulated/legacy/temp_shazam $backupdest/shazam
 adb shell "su -c rm -r /storage/emulated/0/temp_shazam"
-mv $backupdest/shazam_$foldername/library.db $backupdest/shazam_$foldername/shazam-library_$foldername.db
 
 # backup whatsapp media
-adb pull -a /sdcard/WhatsApp/Media $backupdest/whatsapp_$foldername/
+adb pull -a /sdcard/WhatsApp/Media $backupdest/whatsapp
 
 # backup recordings from internal sd card
-adb pull -a /sdcard/Sounds $backupdest/sounds_$foldername
+adb pull -a /sdcard/Sounds $backupdest/sounds
 
 # backup photographs from internal sd card
-adb pull -a /sdcard/DCIM/Camera $backupdest/sdcard_$foldername
+adb pull -a /sdcard/DCIM/Camera $backupdest/sdcard
 
 # backup pictures from internal sd card (screenshots)
-adb pull -a /sdcard/Pictures/Screenshots $backupdest/screenshots_$foldername
+adb pull -a /sdcard/Pictures/Screenshots $backupdest/screenshots
 
 # backup pictures from internal sd card (9GAG)
-adb pull -a /sdcard/Pictures/9GAG $backupdest/9gag_$foldername
+adb pull -a /sdcard/Pictures/9GAG $backupdest/9gag
 
 # backup downloads from internal sd card
-adb pull -a /sdcard/Download $backupdest/downloads_$foldername
+adb pull -a /sdcard/Download $backupdest/downloads
