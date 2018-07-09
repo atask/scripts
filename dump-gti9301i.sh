@@ -1,7 +1,10 @@
 #!/bin/bash
+set -e
 
-backupdest=~/Downloads/dumps-gti9301i
 foldername=$(date +%Y%m%d)
+backupdest=~/Downloads/dumps-gti9301i/dump-gti9301i-$foldername
+
+mkdir -p $backupdest
 
 # backup recorded voice
 adb pull -a /sdcard/Sounds $backupdest/sounds_$foldername
